@@ -1,0 +1,73 @@
+Welcom to SDN repo!
+
+Description:
+============
+Use cpqd ofsoftswitch13 as switches
+https://github.com/CPqD/ofsoftswitch13
+
+Use ryu as controller
+https://github.com/osrg/ryu
+http://sourceforge.net/projects/ryu/
+
+How to install Controller:
+==========================
+apt-get install gcc python-dev libxml2-dev libxslt1-dev
+
+apt-get install mysql-server mysql-client
+Setup password as "mysql" when a window prompt.
+
+mysql -u root -p
+Enter your password and get commond line.
+
+create database meshsr;
+use meshsr:
+source meshsr.sql
+
+Check the table in database meshsr:
+show tables;
+
+apt-get install python-mysqldb
+apt-get install apache2
+apt-get install php5 libapache2-mod-php5
+apt-get install phpmyadmin
+Choose apache2.
+Choose Yes
+Enter password "mysql"
+
+vi /etc/apache2/httpd.conf
+
+<VirtualHost *:80>
+
+	ServerAdmin webmaster@localhost
+	ServerName localhost
+	DocumentRoot /var/www/meshsr
+
+	<Directory /var/www/meshsr>
+
+		Allow from all
+		AddHandler mod_php5 .php
+		Options Indexes FollowSymLinks
+		AllowOverride None
+		DirectoryIndex index.php
+
+	</Directory>
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+</VirtualHost>
+
+cp -r /media/sf_share/sdn/meshsr /var/www/
+chown -R 755 /var/www/meshsr
+
+/etc/init.d/apache2 restart
+
+apt-get install python-pip
+cd ryu_0814_2045
+python setup.py install
+
+ryu-manager --version
+if this commond goes wrong , please install some libs
+
+set your ip address 10.0.0.1.
+./topo_start.sh

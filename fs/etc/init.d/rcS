@@ -1,0 +1,49 @@
+#!/bin/sh
+
+echo "Starting rcS..."
+
+echo "++ Mounting filesystem"
+mount -t proc none /proc
+mount -t sysfs none /sys
+mount -t tmpfs none /tmp
+
+echo "++ Setting up mdev"
+
+echo /sbin/mdev > /proc/sys/kernel/hotplug
+mdev -s
+
+mkdir -p /dev/pts
+mkdir -p /dev/i2c
+mount -t devpts devpts /dev/pts
+
+echo "++ Starting telnet daemon"
+telnetd -l /bin/sh
+
+echo "++ Starting http daemon"
+httpd -h /var/www
+
+echo "++ Starting ftp daemon"
+tcpsvd 0:21 ftpd ftpd -w /&
+
+echo "++ Starting dropbear (ssh) daemon"
+dropbear
+
+if [ -e /dev/mmcblk0p1 ]
+then
+	echo "++ Mounting SD Card at /mnt"
+	mount /dev/mmcblk0p1 /mnt
+else
+	if [ -e /dev/mmcblk0 ]
+	then
+		echo "++ Mounting SD Card at /mnt"
+		mount /dev/mmcblk0 /mnt
+	fi
+fi
+
+if [ -f /mnt/init.sh ]
+then
+	echo "++ Running user script init.sh from SD Card"
+     	source /mnt/init.sh
+fi
+
+echo "rcS Complete"
